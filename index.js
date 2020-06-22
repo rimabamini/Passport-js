@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.static(__dirname)); // directory to serve static files
 
-// Middleware
+// Middleware: body-parser
 const bodyParser = require('body-parser');
 const expressSession = require('express-session')({
   secret: 'secret',
@@ -20,3 +20,10 @@ app.use(expressSession);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('App listening on port ' + port));
+
+/*  PASSPORT SETUP  */
+
+const passport = require('passport');
+// Middleware: Session Authentication 
+app.use(passport.initialize());
+app.use(passport.session());
