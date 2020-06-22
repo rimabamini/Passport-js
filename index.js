@@ -44,3 +44,10 @@ const UserDetail = new Schema({
 
 UserDetail.plugin(passportLocalMongoose);
 const UserDetails = mongoose.model('userInfo', UserDetail, 'userInfo');
+
+/* PASSPORT LOCAL AUTHENTICATION */
+
+passport.use(UserDetails.createStrategy());
+
+passport.serializeUser(UserDetails.serializeUser()); // will be invoked on authentication, job is to serialize user instance with information we pass on to it and store it in the session via a cookie
+passport.deserializeUser(UserDetails.deserializeUser()); // provide unique cookie identifier as a “credential”
