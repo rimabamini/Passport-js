@@ -46,8 +46,61 @@ UserDetail.plugin(passportLocalMongoose);
 const UserDetails = mongoose.model('userInfo', UserDetail, 'userInfo');
 
 /* PASSPORT LOCAL AUTHENTICATION */
-
+/* check check */
 passport.use(UserDetails.createStrategy());
 
 passport.serializeUser(UserDetails.serializeUser()); // will be invoked on authentication, job is to serialize user instance with information we pass on to it and store it in the session via a cookie
 passport.deserializeUser(UserDetails.deserializeUser()); // provide unique cookie identifier as a “credential”
+/* stop check ^ */
+
+/* ROUTES */
+
+const connectEnsureLogin = require('connect-ensure-login');
+
+/*
+If authentication fails, it will redirect us to /login, 
+but it will add a query parameter — info — that will contain 
+an error message. Otherwise, if authentication is successful, 
+it will redirect us to the '/' route.
+*/
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local',
+  (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      return res.redirect('/login?info=' + info);
+    }
+
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+
+      return res.redirect('/');
+    });
+
+  })(req, res, next);
+});
+
+app.get('/login',
+  (req, res) => res.sendFile('html/login.html',
+  { root: __dirname })
+);
+
+app.get('/',
+  connectEnsureLogin.ensureLoggedIn(),
+  (req, res) => res.sendFile('html/index.html', {root: __dirname})
+);
+
+app.get('/private',
+  connectEnsureLogin.ensureLoggedIn(),
+  (req, res) => res.sendFile('html/private.html', {root: __dirname})
+);
+
+app.get('/user',
+  connectEnsureLogin.ensureLoggedIn(),
+  (req, res) => res.send({user: req.user})
+);
